@@ -26,7 +26,15 @@ dependencies {
     implementation 'org.xerial:sqlite-jdbc:3.39.3.0'
 }
 
+task stage(type: Copy, dependsOn: [clean, build]) {
+    from jar.archivePath
+    into project.rootDir
+    rename {
+        'app.jar'
+    }
+}
+stage.mustRunAfter(clean)
+
 compileJava.options.encoding = 'UTF-8'
 
-task stage(dependsOn: ['build', 'clean'])
 build.mustRunAfter clean
