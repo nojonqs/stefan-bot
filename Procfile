@@ -1,1 +1,1 @@
-worker: java -jar app.jar
+worker: java -jar build/libs/*-all.jar
