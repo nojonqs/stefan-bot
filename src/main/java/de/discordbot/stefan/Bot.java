@@ -38,7 +38,7 @@ public class Bot {
     }
 
     private static String getToken() {
-        return args[0];
+        return System.getenv("TOKEN");
     }
 
     public static Optional<Role> getGuestRole(Guild guild) {
