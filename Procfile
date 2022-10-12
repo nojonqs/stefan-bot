@@ -1,1 +1,1 @@
-worker: java -jar app.jar $TOKEN
+worker: java -jar build/libs/StefanBot-1.0-all.jar $TOKEN
