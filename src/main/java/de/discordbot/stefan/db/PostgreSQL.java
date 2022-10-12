@@ -8,7 +8,7 @@ public class PostgreSQL extends DatabaSQL {
   @Override
   public void connect() {
     try {
-      Class.forName("com.mysql.jdbc.Driver");
+      Class.forName("org.postgresql.Driver");
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
