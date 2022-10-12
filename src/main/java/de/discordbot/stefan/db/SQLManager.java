@@ -5,6 +5,7 @@ import de.discordbot.stefan.Bot;
 public class SQLManager {
 
   private SQLManager() {
+
   }
 
   public static void onCreate() {
