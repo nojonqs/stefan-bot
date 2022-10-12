@@ -1,1 +1,1 @@
-worker: java -jar app.jar $TOKEN
+worker: java -jar app.jar
