@@ -9,6 +9,6 @@ public class SQLManager {
 
   public static void onCreate() {
     Bot.getDb().onUpdate(
-        "CREATE TABLE IF NOT EXISTS guildinfo(guildid INTEGER NOT NULL PRIMARY KEY, guestroleid INTEGER, guestchannelid INTEGER, adminchannelid INTEGER, prefix TEXT DEFAULT '!')");
+        "CREATE TABLE IF NOT EXISTS guildinfo(guildid BIGINT NOT NULL PRIMARY KEY, guestroleid BIGINT, guestchannelid BIGINT, adminchannelid BIGINT, prefix TEXT DEFAULT '!')");
   }
 }
