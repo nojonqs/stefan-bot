@@ -39,7 +39,9 @@ public class ReadyListener extends ListenerAdapter {
 
     public void guestUserWarningsAndKicks() {
         for (Guild guild : Bot.api.getGuilds()) {
+            System.out.printf("Periodic call on guild %s...", guild.toString());
             if (!Bot.isGuildSetupComplete(guild)) continue;
+            System.out.println(" guild is setup correctly!");
 
             Optional<Role> guestRole = Bot.getGuestRole(guild);
             if (!guestRole.isPresent()) continue;
@@ -47,8 +49,12 @@ public class ReadyListener extends ListenerAdapter {
             Task<List<Member>> guestMembers = guild.findMembersWithRoles(guestRole.get());
             guestMembers.onSuccess(guests -> {
                 for (Member guest : guests) {
+                    System.out.printf("Checking member %s...", guest.toString());
+
                     // Only kick members with JUST the guest role
                     if (guest.getRoles().size() > 1) continue;
+
+                    System.out.print(" member is guest...");
 
                     // Calculate time until the player should be kicked
                     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
@@ -60,12 +66,14 @@ public class ReadyListener extends ListenerAdapter {
 
                     // notify admins a specific time before the guest will be kicked
                     if (daysSinceJoin >= DAYS_BEFORE_KICK - 3 && daysSinceJoin < DAYS_BEFORE_KICK) {
+                        System.out.printf(" sending warning since member will be kicked in %f days!%n", daysUntilKick);
                         TextChannel adminChannel = Bot.getAdminChannel(guild);
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm:ss");
                         adminChannel.sendMessage(String.format("User <@%s> will be kicked in %.2f days (at %s)", guest.getIdLong(), daysUntilKick, now.plusSeconds(secondsUntilKick).format(formatter))).queue();
                     }
                     // kick the guest if its time is up
                     else if (daysSinceJoin >= DAYS_BEFORE_KICK) {
+                        System.out.printf(" kicking member since his kick is due since %f days!%n", daysUntilKick);
                         TextChannel adminChannel = Bot.getAdminChannel(guild);
                         adminChannel.sendMessage(String.format("User <@%s> was kicked!", guest.getIdLong())).queue();
                         guest.kick().queue();
