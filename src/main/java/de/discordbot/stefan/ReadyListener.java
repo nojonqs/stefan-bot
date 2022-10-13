@@ -24,7 +24,7 @@ public class ReadyListener extends ListenerAdapter {
   @Override
   public void onReady(ReadyEvent event) {
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
-    ZonedDateTime firstCall = now.withHour(13).withMinute(57).withSecond(0);
+    ZonedDateTime firstCall = now.withHour(12).withMinute(0).withSecond(0);
 
     if (now.compareTo(firstCall) > 0) {
       firstCall = firstCall.plusDays(1);
@@ -41,11 +41,11 @@ public class ReadyListener extends ListenerAdapter {
 
   public void guestUserWarningsAndKicks() {
     for (Guild guild : Bot.api.getGuilds()) {
-      System.out.printf("Periodic call on guild %s...%n", guild.toString());
+      System.out.printf("Periodic call on guild %s...", guild.toString());
       if (!Bot.isGuildSetupComplete(guild)) {
         continue;
       }
-      System.out.println(" guild is setup correctly!");
+      System.out.println("guild is setup correctly!");
 
       Optional<Role> guestRole = Bot.getGuestRole(guild);
       if (!guestRole.isPresent()) {
@@ -55,30 +55,36 @@ public class ReadyListener extends ListenerAdapter {
       Task<List<Member>> guestMembers = guild.findMembersWithRoles(guestRole.get());
       guestMembers.onSuccess(guests -> {
         for (Member guest : guests) {
-          System.out.printf("Checking member %s...%n", guest.toString());
+          StringBuilder sb = new StringBuilder();
+          sb.append(String.format("Checking member %s in guild %s...", guest.toString(), guild));
 
           // Only kick members with JUST the guest role
           if (guest.getRoles().size() > 1) {
+            sb.append(" has more roles, skipping!\n");
+            System.out.println(sb);
             continue;
           }
 
-          System.out.println("member is guest...");
+          sb.append(" member is guest...");
 
           // Calculate time until the player should be kicked
           ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
           ZonedDateTime joinTime = guest.getTimeJoined()
               .atZoneSameInstant(ZoneId.of("Europe/Berlin"));
           long secondsSinceJoin = Duration.between(joinTime, now).getSeconds();
-          double daysSinceJoin = secondsSinceJoin /  (60.0 * 60 * 24);
+          double daysSinceJoin = secondsSinceJoin / (60.0 * 60 * 24);
           double daysUntilKick = DAYS_BEFORE_KICK - daysSinceJoin;
           long secondsUntilKick = (long) (daysUntilKick * (60.0 * 60 * 24));
-          System.out.printf("joined %.2f days ago and will be kicked in %.2f days...%n",
-              daysSinceJoin, daysUntilKick);
+
+          sb.append(String.format(" joined %.2f days ago and will be kicked in %.2f days...",
+              daysSinceJoin, daysUntilKick));
 
           // notify admins a specific time before the guest will be kicked
           if (daysSinceJoin >= DAYS_BEFORE_KICK - 3 && daysSinceJoin < DAYS_BEFORE_KICK) {
-            System.out.printf("sending warning since member will be kicked in %f days!%n",
-                daysUntilKick);
+            sb.append(String.format(" sending warning since member will be kicked in %f days!",
+                daysUntilKick));
+            System.out.println(sb);
+
             TextChannel adminChannel = Bot.getAdminChannel(guild);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm:ss");
             adminChannel.sendMessage(
@@ -87,8 +93,9 @@ public class ReadyListener extends ListenerAdapter {
           }
           // kick the guest if its time is up
           else if (daysSinceJoin >= DAYS_BEFORE_KICK) {
-            System.out.printf("kicking member since his kick is due since %f days!%n",
-                daysUntilKick);
+            sb.append(String.format(" kicking member since his kick is due since %f days!", -daysUntilKick));
+            System.out.println(sb);
+
             TextChannel adminChannel = Bot.getAdminChannel(guild);
             adminChannel.sendMessage(String.format("User <@%s> was kicked!", guest.getIdLong()))
                 .queue();
@@ -96,8 +103,6 @@ public class ReadyListener extends ListenerAdapter {
           }
         }
       });
-
-
     }
   }
 }
