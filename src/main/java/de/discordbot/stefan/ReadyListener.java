@@ -24,7 +24,7 @@ public class ReadyListener extends ListenerAdapter {
   @Override
   public void onReady(ReadyEvent event) {
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
-    ZonedDateTime firstCall = now.withHour(12).withMinute(0).withSecond(0);
+    ZonedDateTime firstCall = now.withHour(13).withMinute(45).withSecond(0);
 
     if (now.compareTo(firstCall) > 0) {
       firstCall = firstCall.plusDays(1);
@@ -72,6 +72,8 @@ public class ReadyListener extends ListenerAdapter {
           double daysSinceJoin = secondsSinceJoin / (double) (60 * 60 * 24);
           double daysUntilKick = DAYS_BEFORE_KICK - (double) secondsSinceJoin;
           long secondsUntilKick = (long) (daysUntilKick * (60 * 60 * 24));
+          System.out.printf("joined %.2f days ago and will be kicked in %.2f days...%n",
+              daysSinceJoin, daysUntilKick);
 
           // notify admins a specific time before the guest will be kicked
           if (daysSinceJoin >= DAYS_BEFORE_KICK - 3 && daysSinceJoin < DAYS_BEFORE_KICK) {
