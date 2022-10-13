@@ -24,7 +24,7 @@ public class ReadyListener extends ListenerAdapter {
   @Override
   public void onReady(ReadyEvent event) {
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
-    ZonedDateTime firstCall = now.withHour(13).withMinute(55).withSecond(0);
+    ZonedDateTime firstCall = now.withHour(13).withMinute(57).withSecond(0);
 
     if (now.compareTo(firstCall) > 0) {
       firstCall = firstCall.plusDays(1);
