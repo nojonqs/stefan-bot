@@ -24,7 +24,7 @@ public class ReadyListener extends ListenerAdapter {
   @Override
   public void onReady(ReadyEvent event) {
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
-    ZonedDateTime firstCall = now.withHour(13).withMinute(45).withSecond(0);
+    ZonedDateTime firstCall = now.withHour(13).withMinute(52).withSecond(0);
 
     if (now.compareTo(firstCall) > 0) {
       firstCall = firstCall.plusDays(1);
@@ -68,10 +68,10 @@ public class ReadyListener extends ListenerAdapter {
           ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
           ZonedDateTime joinTime = guest.getTimeJoined()
               .atZoneSameInstant(ZoneId.of("Europe/Berlin"));
-          long secondsSinceJoin = Duration.between(joinTime, now).getSeconds();
-          double daysSinceJoin = secondsSinceJoin / (double) (60 * 60 * 24);
-          double daysUntilKick = DAYS_BEFORE_KICK - (double) secondsSinceJoin;
-          long secondsUntilKick = (long) (daysUntilKick * (60 * 60 * 24));
+          double secondsSinceJoin = (double) Duration.between(joinTime, now).getSeconds();
+          double daysSinceJoin = secondsSinceJoin /  (60.0 * 60 * 24);
+          double daysUntilKick = DAYS_BEFORE_KICK - secondsSinceJoin;
+          double secondsUntilKick = daysUntilKick * (60.0 * 60 * 24);
           System.out.printf("joined %.2f days ago and will be kicked in %.2f days...%n",
               daysSinceJoin, daysUntilKick);
 
@@ -83,7 +83,7 @@ public class ReadyListener extends ListenerAdapter {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm:ss");
             adminChannel.sendMessage(
                 String.format("User <@%s> will be kicked in %.2f days (at %s)", guest.getIdLong(),
-                    daysUntilKick, now.plusSeconds(secondsUntilKick).format(formatter))).queue();
+                    daysUntilKick, now.plusSeconds((long) secondsUntilKick).format(formatter))).queue();
           }
           // kick the guest if its time is up
           else if (daysSinceJoin >= DAYS_BEFORE_KICK) {
