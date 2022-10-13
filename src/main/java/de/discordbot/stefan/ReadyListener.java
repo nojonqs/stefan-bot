@@ -24,7 +24,7 @@ public class ReadyListener extends ListenerAdapter {
   @Override
   public void onReady(ReadyEvent event) {
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
-    ZonedDateTime firstCall = now.withHour(12).withMinute(0).withSecond(0);
+    ZonedDateTime firstCall = now.withHour(13).withMinute(30).withSecond(0);
 
     if (now.compareTo(firstCall) > 0) {
       firstCall = firstCall.plusDays(1);
@@ -36,7 +36,7 @@ public class ReadyListener extends ListenerAdapter {
     // Check guests every 12 hours at starting at 12:00:00
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     scheduler.scheduleAtFixedRate(this::guestUserWarningsAndKicks, initialDelayFirstCall,
-        TimeUnit.HOURS.toSeconds(12), TimeUnit.HOURS);
+        TimeUnit.HOURS.toSeconds(12), TimeUnit.SECONDS);
   }
 
   public void guestUserWarningsAndKicks() {
