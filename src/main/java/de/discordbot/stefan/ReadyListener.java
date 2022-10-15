@@ -24,14 +24,21 @@ public class ReadyListener extends ListenerAdapter {
   @Override
   public void onReady(ReadyEvent event) {
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
-    ZonedDateTime firstCall = now.withHour(12).withMinute(0).withSecond(0);
+    ZonedDateTime midday = now.withHour(12).withMinute(0).withSecond(0);
+    ZonedDateTime midnight = now.withHour(0).withMinute(0).withSecond(0);
 
-    if (now.compareTo(firstCall) > 0) {
-      firstCall = firstCall.plusDays(1);
+    if (now.compareTo(midday) > 0) {
+      midday = midday.plusDays(1);
+    }
+    if (now.compareTo(midnight) > 0) {
+      midnight = midnight.plusDays(1);
     }
 
-    Duration durationUntilFirstCall = Duration.between(now, firstCall);
-    long initialDelayFirstCall = durationUntilFirstCall.getSeconds();
+    Duration durationUntilMidday = Duration.between(now, midday);
+    Duration durationUntilMidnight = Duration.between(now, midnight);
+    long secondsUntilMidday = durationUntilMidday.getSeconds();
+    long secondsUntilMidnight = durationUntilMidnight.getSeconds();
+    long initialDelayFirstCall = Math.min(secondsUntilMidday, secondsUntilMidnight);
 
     // Check guests every 12 hours at starting at 12:00:00
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -62,6 +69,7 @@ public class ReadyListener extends ListenerAdapter {
           if (guest.getRoles().size() > 1) {
             sb.append(" has more roles, skipping!\n");
             System.out.println(sb);
+            System.out.println("StringBuilder sent");
             continue;
           }
 
@@ -84,6 +92,7 @@ public class ReadyListener extends ListenerAdapter {
             sb.append(String.format(" sending warning since member will be kicked in %f days!",
                 daysUntilKick));
             System.out.println(sb);
+            System.out.println("StringBuilder sent");
 
             TextChannel adminChannel = Bot.getAdminChannel(guild);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm:ss");
@@ -95,6 +104,7 @@ public class ReadyListener extends ListenerAdapter {
           else if (daysSinceJoin >= DAYS_BEFORE_KICK) {
             sb.append(String.format(" kicking member since his kick is due since %f days!", -daysUntilKick));
             System.out.println(sb);
+            System.out.println("StringBuilder sent");
 
             TextChannel adminChannel = Bot.getAdminChannel(guild);
             adminChannel.sendMessage(String.format("User <@%s> was kicked!", guest.getIdLong()))
