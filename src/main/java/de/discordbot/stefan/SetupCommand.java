@@ -1,5 +1,7 @@
 package de.discordbot.stefan;
 
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -10,6 +12,16 @@ public class SetupCommand extends ListenerAdapter {
   @Override
   public void onMessageReceived(MessageReceivedEvent event) {
     if (event.getAuthor().isBot()) {
+      return;
+    }
+    if (!event.isFromGuild()) {
+      return;
+    }
+
+    Member member = event.getMember();
+    assert member != null;
+
+    if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
       return;
     }
 
