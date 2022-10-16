@@ -47,7 +47,7 @@ public class ReadyListener extends ListenerAdapter {
   }
 
   public void guestUserWarningsAndKicks() {
-    for (Guild guild : Bot.api.getGuilds()) {
+    for (Guild guild : Bot.getJDA().getGuilds()) {
       System.out.printf("Periodic call on guild %s...", guild.toString());
       if (!Bot.isGuildSetupComplete(guild)) {
         continue;

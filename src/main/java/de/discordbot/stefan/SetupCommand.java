@@ -31,7 +31,7 @@ public class SetupCommand extends ListenerAdapter {
       MessageChannel channel = event.getChannel();
 
       channel.sendMessage("Please @ the guest role...").queue();
-      Bot.api.addEventListener(new SetupStateMachine(author.getIdLong(), channel.getIdLong()));
+      Bot.getJDA().addEventListener(new SetupStateMachine(author.getIdLong(), channel.getIdLong()));
     }
   }
 }

@@ -83,7 +83,7 @@ public class SetupStateMachine extends ListenerAdapter {
         } else {
           this.adminChannelId = adminChannel.getIdLong();
           channel.sendMessage("The setup is complete!").queue();
-          Bot.api.removeEventListener(this);
+          Bot.getJDA().removeEventListener(this);
           onSetupComplete(guild);
         }
         break;

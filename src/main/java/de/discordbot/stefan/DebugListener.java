@@ -38,7 +38,7 @@ public class DebugListener extends ListenerAdapter {
   }
 
   public void guestUserWarningsAndKicks() {
-    for (Guild guild : Bot.api.getGuilds()) {
+    for (Guild guild : Bot.getJDA().getGuilds()) {
       if (!Bot.isGuildSetupComplete(guild)) {
         continue;
       }

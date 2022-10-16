@@ -16,12 +16,10 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 public class Bot {
 
-  private static String[] args;
-  public static JDA api;
+  private static JDA api;
   private static DatabaSQL db;
 
   public static void main(String[] args) {
-    Bot.args = args;
     String token = getToken();
 
     api = JDABuilder
@@ -46,6 +44,10 @@ public class Bot {
 
   public static DatabaSQL getDb() {
     return Bot.db;
+  }
+
+  public static JDA getJDA() {
+    return Bot.api;
   }
 
   private static String getToken() {
