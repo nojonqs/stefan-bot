@@ -53,70 +53,64 @@ public class Bot {
   }
 
   public static Optional<Role> getGuestRole(Guild guild) {
-    ResultSet set = db.onQuery(
-        String.format("SELECT guestroleid FROM guildinfo WHERE guildid = %d", guild.getIdLong()));
-    if (set == null) {
-      return Optional.empty();
-    }
+    try (ResultSet set = db.onQuery(
+        String.format("SELECT guestroleid FROM guildinfo WHERE guildid = %d", guild.getIdLong()))) {
+      if (set == null) {
+        return Optional.empty();
+      }
 
-    try {
       if (set.next()) {
         long guestroleid = set.getLong("guestroleid");
         return Optional.ofNullable(guild.getRoleById(guestroleid));
       }
     } catch (SQLException e) {
-      System.out.println("ERROR: SQLException thrown in Bot.getAdminChannel()");
+      e.printStackTrace();
     }
     return Optional.empty();
   }
 
   public static boolean isGuildSetupComplete(Guild guild) {
-    ResultSet set = db.onQuery(
-        String.format("SELECT * FROM guildinfo WHERE guildid = %d", guild.getIdLong()));
-    if (set == null) {
-      return false;
-    }
-
-    try {
+    try (ResultSet set = db.onQuery(
+        String.format("SELECT * FROM guildinfo WHERE guildid = %d", guild.getIdLong()))) {
+      if (set == null) {
+        return false;
+      }
       return set.next();
     } catch (SQLException e) {
-      System.out.println("ERROR: SQLException thrown in Bot.isGuildSetupComplete()");
+      e.printStackTrace();
     }
     return false;
   }
 
   public static TextChannel getAdminChannel(Guild guild) {
-    ResultSet set = db.onQuery(
+    try (ResultSet set = db.onQuery(
         String.format("SELECT adminchannelid FROM guildinfo WHERE guildid = %d",
-            guild.getIdLong()));
-    if (set == null) {
-      return null;
-    }
-
-    try {
+            guild.getIdLong()))) {
+      if (set == null) {
+        return null;
+      }
       if (set.next()) {
         long adminchannelid = set.getLong("adminchannelid");
         return guild.getTextChannelById(adminchannelid);
       }
     } catch (SQLException e) {
-      System.out.println("ERROR: SQLException thrown in Bot.getAdminChannel()");
+      e.printStackTrace();
     }
     return null;
   }
 
   public static String getPrefix(Guild guild) {
-    ResultSet set = db.onQuery(
-        String.format("SELECT prefix FROM guildinfo WHERE guildid = %d", guild.getIdLong()));
-    if (set == null) {
-      return "!";
-    }
+    try (ResultSet set = db.onQuery(
+        String.format("SELECT prefix FROM guildinfo WHERE guildid = %d", guild.getIdLong()))) {
+      if (set == null) {
+        return "!";
+      }
 
-    try {
       if (set.next()) {
         return set.getString("prefix");
       }
     } catch (SQLException e) {
-      System.out.println("ERROR: SQLException thrown in Bot.getPrefix()");
+      e.printStackTrace();
     }
     return "!";
   }
