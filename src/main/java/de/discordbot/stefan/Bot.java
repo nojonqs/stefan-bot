@@ -1,7 +1,6 @@
 package de.discordbot.stefan;
 
 import de.discordbot.stefan.db.DatabaSQL;
-import de.discordbot.stefan.db.LiteSQL;
 import de.discordbot.stefan.db.PostgreSQL;
 import de.discordbot.stefan.db.SQLManager;
 import java.sql.ResultSet;
@@ -13,6 +12,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 public class Bot {
 
@@ -24,8 +24,11 @@ public class Bot {
     Bot.args = args;
     String token = getToken();
 
-    api = JDABuilder.createDefault(token)
-        .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS).build();
+    api = JDABuilder
+        .createDefault(token)
+        .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
+        .setMemberCachePolicy(MemberCachePolicy.ALL)
+        .build();
 
     // To set up the bot and tell it which guest role to use etc.
     api.addEventListener(new SetupCommand());
