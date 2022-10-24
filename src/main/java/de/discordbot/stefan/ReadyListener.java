@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -46,6 +48,14 @@ public class ReadyListener extends ListenerAdapter {
         TimeUnit.HOURS.toSeconds(12), TimeUnit.SECONDS);
   }
 
+  private long daysToSeconds(double days) {
+    return (long) (days * (60.0 * 60 * 24));
+  }
+
+  private double secondsToDays(long seconds) {
+    return seconds / (60.0 * 60 * 24);
+  }
+
   public void guestUserWarningsAndKicks() {
     for (Guild guild : Bot.getJDA().getGuilds()) {
       System.out.printf("Periodic call on guild %s...", guild.toString());
@@ -69,7 +79,6 @@ public class ReadyListener extends ListenerAdapter {
           if (guest.getRoles().size() > 1) {
             sb.append(" has more roles, skipping!\n");
             System.out.println(sb);
-            System.out.println("StringBuilder sent");
             continue;
           }
 
@@ -80,31 +89,47 @@ public class ReadyListener extends ListenerAdapter {
           ZonedDateTime joinTime = guest.getTimeJoined()
               .atZoneSameInstant(ZoneId.of("Europe/Berlin"));
           long secondsSinceJoin = Duration.between(joinTime, now).getSeconds();
-          double daysSinceJoin = secondsSinceJoin / (60.0 * 60 * 24);
+          double daysSinceJoin = secondsToDays(secondsSinceJoin);
           double daysUntilKick = DAYS_BEFORE_KICK - daysSinceJoin;
-          long secondsUntilKick = (long) (daysUntilKick * (60.0 * 60 * 24));
+          long secondsUntilKick = daysToSeconds(daysUntilKick);
+
+          // round the kick time to 12:00:00 or 00:00:00, depending on which is earlier
+          ZonedDateTime kickDateTime = now.plusSeconds(secondsUntilKick);
+          ZonedDateTime middayKickDateTime = kickDateTime.withHour(12).withMinute(0).withSecond(0);
+          ZonedDateTime midnightKickDateTime = kickDateTime.withHour(0).withMinute(0).withSecond(0);
+
+          if (kickDateTime.compareTo(middayKickDateTime) > 0) {
+            middayKickDateTime.plusDays(1);
+          }
+          if (kickDateTime.compareTo(midnightKickDateTime) > 0) {
+            midnightKickDateTime.plusDays(1);
+          }
+
+          ZonedDateTime actualKickDateTime = middayKickDateTime.compareTo(midnightKickDateTime) < 0 ? middayKickDateTime : midnightKickDateTime;
+          long secondsUntilActualKick = Duration.between(now, actualKickDateTime).getSeconds();
+          double daysUntilActualKick = secondsToDays(secondsUntilActualKick);
 
           sb.append(String.format(" joined %.2f days ago and will be kicked in %.2f days...",
-              daysSinceJoin, daysUntilKick));
+              daysSinceJoin, daysUntilActualKick));
 
           // notify admins a specific time before the guest will be kicked
-          if (daysSinceJoin >= DAYS_BEFORE_KICK - 3 && daysSinceJoin < DAYS_BEFORE_KICK) {
+          if (0 <= daysUntilActualKick && daysUntilActualKick <= 3) {
             sb.append(String.format(" sending warning since member will be kicked in %f days!",
-                daysUntilKick));
+                    daysUntilActualKick));
             System.out.println(sb);
-            System.out.println("StringBuilder sent");
 
             TextChannel adminChannel = Bot.getAdminChannel(guild);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm:ss");
             adminChannel.sendMessage(
                 String.format("User <@%s> will be kicked in %.2f days (at %s)", guest.getIdLong(),
-                    daysUntilKick, now.plusSeconds(secondsUntilKick).format(formatter))).queue();
+                        daysUntilActualKick, now.plusSeconds(secondsUntilActualKick).format(formatter))).queue();
           }
           // kick the guest if its time is up
-          else if (daysSinceJoin >= DAYS_BEFORE_KICK) {
+          // we use the not-rounded dasUntilKick, since the daysUntilActualKick will be 0 on exactly the time we do this
+          // check, which may be off by a second.
+          else if (daysUntilKick <= 0) {
             sb.append(String.format(" kicking member since his kick is due since %f days!", -daysUntilKick));
             System.out.println(sb);
-            System.out.println("StringBuilder sent");
 
             TextChannel adminChannel = Bot.getAdminChannel(guild);
             adminChannel.sendMessage(String.format("User <@%s> was kicked!", guest.getIdLong()))
