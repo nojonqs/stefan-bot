@@ -99,10 +99,10 @@ public class ReadyListener extends ListenerAdapter {
           ZonedDateTime midnightKickDateTime = kickDateTime.withHour(0).withMinute(0).withSecond(0);
 
           if (kickDateTime.compareTo(middayKickDateTime) > 0) {
-            middayKickDateTime.plusDays(1);
+            middayKickDateTime = middayKickDateTime.plusDays(1);
           }
           if (kickDateTime.compareTo(midnightKickDateTime) > 0) {
-            midnightKickDateTime.plusDays(1);
+            midnightKickDateTime = midnightKickDateTime.plusDays(1);
           }
 
           ZonedDateTime actualKickDateTime = middayKickDateTime.compareTo(midnightKickDateTime) < 0 ? middayKickDateTime : midnightKickDateTime;
