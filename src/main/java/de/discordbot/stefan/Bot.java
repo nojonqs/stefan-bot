@@ -22,8 +22,18 @@ public class Bot {
   public static void main(String[] args) {
     registerSignalHandlers();
 
-    String token = getToken();
+    // wait for database service to have started
+    try {
+      Thread.sleep(30_000L);
+    } catch (InterruptedException ignored) {}
 
+    // database stuff
+    db = new PostgreSQL();
+    db.connect();
+    SQLManager.onCreate();
+
+    // build the bot
+    String token = getToken();
     api = JDABuilder
         .createDefault(token)
         .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
@@ -38,14 +48,6 @@ public class Bot {
 
     // To periodically check members for guests and kick them after a while
     api.addEventListener(new ReadyListener());
-
-    try {
-      Thread.sleep(30_000L);
-    } catch (InterruptedException ignored) {}
-
-    db = new PostgreSQL();
-    db.connect();
-    SQLManager.onCreate();
   }
 
   private static void registerSignalHandlers() {
