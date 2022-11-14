@@ -20,6 +20,8 @@ public class Bot {
   private static DatabaSQL db;
 
   public static void main(String[] args) {
+    registerSignalHandlers();
+
     String token = getToken();
 
     api = JDABuilder
@@ -37,12 +39,22 @@ public class Bot {
     // To periodically check members for guests and kick them after a while
     api.addEventListener(new ReadyListener());
 
+    try {
+      Thread.sleep(30_000L);
+    } catch (InterruptedException ignored) {}
+
     db = new PostgreSQL();
     db.connect();
     SQLManager.onCreate();
   }
 
-  public static DatabaSQL getDb() {
+  private static void registerSignalHandlers() {
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      DatabaSQL db = getDb();
+      if (db != null) db.disconnect();
+    }));
+  }
+  public static DatabaSQL getDb()  {
     return Bot.db;
   }
 
@@ -55,7 +67,7 @@ public class Bot {
   }
 
   public static Optional<Role> getGuestRole(Guild guild) {
-    try (ResultSet set = db.onQuery(
+    try (ResultSet set = getDb().onQuery(
         String.format("SELECT guestroleid FROM guildinfo WHERE guildid = %d", guild.getIdLong()))) {
       if (set == null) {
         return Optional.empty();
@@ -72,7 +84,7 @@ public class Bot {
   }
 
   public static boolean isGuildSetupComplete(Guild guild) {
-    try (ResultSet set = db.onQuery(
+    try (ResultSet set = getDb().onQuery(
         String.format("SELECT * FROM guildinfo WHERE guildid = %d", guild.getIdLong()))) {
       if (set == null) {
         return false;
@@ -85,7 +97,7 @@ public class Bot {
   }
 
   public static TextChannel getAdminChannel(Guild guild) {
-    try (ResultSet set = db.onQuery(
+    try (ResultSet set = getDb().onQuery(
         String.format("SELECT adminchannelid FROM guildinfo WHERE guildid = %d",
             guild.getIdLong()))) {
       if (set == null) {
@@ -102,7 +114,7 @@ public class Bot {
   }
 
   public static String getPrefix(Guild guild) {
-    try (ResultSet set = db.onQuery(
+    try (ResultSet set = getDb().onQuery(
         String.format("SELECT prefix FROM guildinfo WHERE guildid = %d", guild.getIdLong()))) {
       if (set == null) {
         return "!";
