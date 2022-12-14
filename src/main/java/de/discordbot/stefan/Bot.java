@@ -22,11 +22,6 @@ public class Bot {
   public static void main(String[] args) {
     registerSignalHandlers();
 
-    // wait for database service to have started
-    try {
-      Thread.sleep(30_000L);
-    } catch (InterruptedException ignored) {}
-
     // database stuff
     db = new PostgreSQL();
     db.connect();
